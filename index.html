@@ -4,13 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生签到系统 (修正版)</title>
+    <title>学生签到系统 (稳定版)</title>
 
     <style>
         :root {
             --primary-color: #007AFF;
             --success-color: #34C759;
             --danger-color: #FF3B30;
+            --warning-color: #FF9500;
+            --purple-color: #5856D6;
             --light-gray: #f8f9fa;
             --medium-gray: #e9ecef;
             --dark-gray: #495057;
@@ -159,10 +161,6 @@
             margin-top: 15px;
         }
 
-        .manage-toggle label {
-            font-weight: bold;
-        }
-
         .switch {
             position: relative;
             display: inline-block;
@@ -214,7 +212,9 @@
             gap: 10px;
         }
 
-        .action-buttons button {
+        .action-buttons button,
+        #saveHistoryBtn {
+            width: 100%;
             padding: 12px;
             border: none;
             color: white;
@@ -223,9 +223,17 @@
             font-size: 16px;
         }
 
+        #saveHistoryBtn {
+            background-color: var(--purple-color);
+            margin-top: 5px;
+        }
+
+        #viewHistoryBtn {
+            background-color: var(--warning-color);
+        }
+
         #statsBtn {
-            background-color: #ff9500;
-            grid-column: 1 / -1;
+            background-color: #17a2b8;
         }
 
         #exportBtn {
@@ -323,11 +331,13 @@
 
         .modal-content {
             background-color: #fefefe;
-            margin: 25% auto;
+            margin: 10% auto;
             padding: 20px;
             border-radius: 12px;
             width: 90%;
             max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .close-btn {
@@ -338,20 +348,61 @@
             cursor: pointer;
         }
 
-        #statsTable {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .modal-header {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
         }
 
-        #statsTable th,
-        #statsTable td {
+        .modal-body {
+            padding-top: 15px;
+        }
+
+        #historyTabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #historyTabs button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #eee;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        #historyTabs button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .date-list button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: var(--light-gray);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: center;
         }
 
-        #statsTable th {
+        th {
             background-color: var(--medium-gray);
         }
     </style>
@@ -379,26 +430,44 @@
                     <button id="manualAddBtn">导入/更新</button>
                     <div class="manage-toggle">
                         <label for="manageModeToggle">编辑名单</label>
-                        <label class="switch">
-                            <input type="checkbox" id="manageModeToggle">
-                            <span class="slider"></span>
-                        </label>
+                        <label class="switch"><input type="checkbox" id="manageModeToggle"><span
+                                class="slider"></span></label>
                     </div>
                 </div>
             </details>
+            <button id="saveHistoryBtn">保存今日记录</button>
             <div class="action-buttons">
-                <button id="statsBtn">查看统计</button>
+                <button id="viewHistoryBtn">查看历史</button>
+                <button id="statsBtn">班级统计</button>
                 <button id="exportBtn">导出名单</button>
-                <button id="resetBtn">重置签到</button>
+                <button id="resetBtn">重置今日签到</button>
             </div>
         </div>
         <div id="studentListContainer"></div>
     </div>
+
     <div id="statsModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>签到统计</h2>
+        <div class="modal-content"><span class="close-btn">&times;</span>
+            <h2>班级统计</h2>
             <div id="statsTableContainer"></div>
+        </div>
+    </div>
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><span class="close-btn">&times;</span>
+                <h2>历史记录</h2>
+            </div>
+            <div class="modal-body">
+                <div id="historyTabs"><button class="active" data-tab="daily">按日期查看</button><button
+                        data-tab="monthly">按月份汇总</button></div>
+                <div id="dailyView">
+                    <div id="dateListContainer"></div>
+                    <div id="dailyRecordContainer"></div>
+                </div>
+                <div id="monthlyView" style="display: none;"><select id="monthSelector"></select>
+                    <div id="monthlySummaryContainer"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -407,88 +476,76 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- DOM 元素获取 (单一来源) ---
+            // --- DOM元素 (单一、干净的来源) ---
             const appContainer = document.getElementById('app-container');
             const studentListContainer = document.getElementById('studentListContainer');
             const searchInput = document.getElementById('searchInput');
             const statsDiv = document.getElementById('stats');
+            const manageModeToggle = document.getElementById('manageModeToggle');
+            const addStudentBtn = document.getElementById('addStudentBtn');
+            const newClassInput = document.getElementById('newClassInput');
+            const newNameInput = document.getElementById('newNameInput');
             const fileInput = document.getElementById('fileInput');
             const manualInput = document.getElementById('manualInput');
             const manualAddBtn = document.getElementById('manualAddBtn');
-            const newClassInput = document.getElementById('newClassInput');
-            const newNameInput = document.getElementById('newNameInput');
-            const addStudentBtn = document.getElementById('addStudentBtn');
-            const manageModeToggle = document.getElementById('manageModeToggle');
+            const saveHistoryBtn = document.getElementById('saveHistoryBtn');
+            const viewHistoryBtn = document.getElementById('viewHistoryBtn');
             const statsBtn = document.getElementById('statsBtn');
             const exportBtn = document.getElementById('exportBtn');
             const resetBtn = document.getElementById('resetBtn');
+            const historyModal = document.getElementById('historyModal');
             const statsModal = document.getElementById('statsModal');
-            const closeBtn = document.querySelector('.close-btn');
+            const historyTabs = document.getElementById('historyTabs');
 
             let students = [];
+            let history = {};
 
-            // --- 核心功能函数 (单一版本) ---
-            const loadStudents = () => {
-                const savedStudents = localStorage.getItem('students_v5');
+            // --- 数据持久化 ---
+            const loadData = () => {
+                const savedStudents = localStorage.getItem('students_v7');
+                const savedHistory = localStorage.getItem('checkin_history_v7');
                 if (savedStudents) students = JSON.parse(savedStudents);
+                if (savedHistory) history = JSON.parse(savedHistory);
                 renderStudentList();
             };
-
             const saveStudents = () => {
-                localStorage.setItem('students_v5', JSON.stringify(students));
+                localStorage.setItem('students_v7', JSON.stringify(students));
                 renderStudentList();
             };
+            const saveHistory = () => {
+                localStorage.setItem('checkin_history_v7', JSON.stringify(history));
+            };
 
+            // --- 核心渲染与统计 ---
             const renderStudentList = () => {
                 const searchTerm = searchInput.value.toLowerCase();
                 studentListContainer.innerHTML = '';
-
                 const filteredStudents = students.filter(s => s.name.toLowerCase().includes(searchTerm));
-                if (filteredStudents.length === 0 && students.length > 0) {
-                    studentListContainer.innerHTML = '<p style="text-align: center; color: #888;">无搜索结果。</p>';
-                } else if (students.length === 0) {
-                    studentListContainer.innerHTML = '<p style="text-align: center; color: #888;">暂无学生名单，请在上方管理区添加。</p>';
-                }
-
-                const groupedByClass = filteredStudents.reduce((acc, student) => {
-                    if (!acc[student.class]) acc[student.class] = [];
-                    acc[student.class].push(student);
-                    return acc;
-                }, {});
-
+                if (filteredStudents.length === 0 && students.length > 0) studentListContainer.innerHTML = '<p style="text-align: center; color: #888;">无搜索结果。</p>';
+                else if (students.length === 0) studentListContainer.innerHTML = '<p style="text-align: center; color: #888;">暂无学生名单，请在上方“导入与管理名单”区域添加。</p>';
+                const groupedByClass = filteredStudents.reduce((acc, student) => { (acc[student.class] = acc[student.class] || []).push(student); return acc; }, {});
                 Object.keys(groupedByClass).sort().forEach(className => {
                     const classGroupDiv = document.createElement('div');
                     classGroupDiv.className = 'class-group';
                     classGroupDiv.innerHTML = `<h2>${className}</h2><div class="student-list"></div>`;
-
                     groupedByClass[className].forEach(student => {
                         const originalIndex = students.findIndex(s => s.name === student.name && s.class === student.class);
                         const studentItem = document.createElement('div');
                         studentItem.className = 'student-item' + (student.checked ? ' checked' : '');
-
                         const label = document.createElement('label');
                         label.textContent = student.name;
-
                         const checkinButton = document.createElement('button');
                         checkinButton.className = 'checkin-btn';
                         checkinButton.innerHTML = student.checked ? '已签到 &#10003;' : '签到';
                         checkinButton.classList.add(student.checked ? 'is-checked' : 'not-checked');
-                        checkinButton.addEventListener('click', () => {
-                            students[originalIndex].checked = !students[originalIndex].checked;
-                            saveStudents();
-                        });
-
+                        checkinButton.addEventListener('click', () => { students[originalIndex].checked = !students[originalIndex].checked; saveStudents(); });
                         const deleteButton = document.createElement('button');
                         deleteButton.className = 'delete-btn';
                         deleteButton.textContent = '删除';
                         deleteButton.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            if (confirm(`确定要删除学生 “${students[originalIndex].name}” 吗？`)) {
-                                students.splice(originalIndex, 1);
-                                saveStudents();
-                            }
+                            e.stopPropagation(); // 关键：防止事件冒泡
+                            if (confirm(`确定要删除学生 “${students[originalIndex].name}” 吗？`)) { students.splice(originalIndex, 1); saveStudents(); }
                         });
-
                         studentItem.appendChild(label);
                         studentItem.appendChild(checkinButton);
                         studentItem.appendChild(deleteButton);
@@ -498,68 +555,88 @@
                 });
                 updateStats();
             };
-
             const updateStats = () => {
                 const total = students.length;
                 statsDiv.innerHTML = '';
                 if (total === 0) return;
                 const checkedIn = students.filter(s => s.checked).length;
                 const percentage = total > 0 ? ((checkedIn / total) * 100).toFixed(1) : 0;
-                statsDiv.innerHTML = `
-                    <div class="stat-item"><h3>总人数</h3><p>${total}</p></div>
-                    <div class="stat-item"><h3>已签到</h3><p>${checkedIn}</p></div>
-                    <div class="stat-item"><h3>未签到</h3><p>${total - checkedIn}</p></div>
-                    <div class="stat-item"><h3>签到率</h3><p>${percentage}%</p></div>`;
+                statsDiv.innerHTML = `<div class="stat-item"><h3>总人数</h3><p>${total}</p></div><div class="stat-item"><h3>已签到</h3><p>${checkedIn}</p></div><div class="stat-item"><h3>未签到</h3><p>${total - checkedIn}</p></div><div class="stat-item"><h3>签到率</h3><p>${percentage}%</p></div>`;
             };
-
-            const handleBulkImport = (newStudents) => {
+            const handleBulkImport = newStudents => {
                 if (newStudents.length > 0) {
-                    if (confirm(`成功解析到 ${newStudents.length} 名学生。这将替换现有全部名单，确定吗？`)) {
-                        students = newStudents;
-                        saveStudents();
-                        alert('名单已成功更新！');
-                    }
+                    if (confirm(`成功解析到 ${newStudents.length} 名学生。这将替换现有全部名单，确定吗？`)) { students = newStudents; saveStudents(); alert('名单已成功更新！'); }
                 } else { alert('未解析到有效数据。请检查文件或文本格式。'); }
             };
 
-            // --- 事件监听器设置 ---
+            // --- 历史记录功能 ---
+            const showDailyDetail = date => {
+                const record = history[date];
+                const container = document.getElementById('dailyRecordContainer');
+                let tableHTML = `<h3>${date} 签到详情</h3><table><tr><th>班级</th><th>姓名</th><th>状态</th></tr>`;
+                record.forEach(student => { tableHTML += `<tr><td>${student.class}</td><td>${student.name}</td><td>${student.checked ? '✔️ 已签到' : '❌ 未签到'}</td></tr>`; });
+                container.innerHTML = tableHTML + '</table>';
+            };
+            const populateDateList = () => {
+                const container = document.getElementById('dateListContainer');
+                container.innerHTML = ''; document.getElementById('dailyRecordContainer').innerHTML = '';
+                const dates = Object.keys(history).sort().reverse();
+                if (dates.length === 0) { container.innerHTML = '<p>暂无历史记录。</p>'; return; }
+                dates.forEach(date => { const dateBtn = document.createElement('button'); dateBtn.textContent = date; dateBtn.addEventListener('click', () => showDailyDetail(date)); container.appendChild(dateBtn); });
+            };
+            const generateMonthlySummary = selectedMonth => {
+                const container = document.getElementById('monthlySummaryContainer');
+                const monthlyData = {};
+                const recordsInMonth = Object.keys(history).filter(date => date.startsWith(selectedMonth));
+                if (recordsInMonth.length === 0) { container.innerHTML = `<p>该月份 (${selectedMonth}) 没有签到记录。</p>`; return; }
+                recordsInMonth.forEach(date => {
+                    history[date].forEach(student => {
+                        const studentId = `${student.class}-${student.name}`;
+                        if (!monthlyData[studentId]) monthlyData[studentId] = { class: student.class, name: student.name, attended: 0 };
+                        if (student.checked) monthlyData[studentId].attended++;
+                    });
+                });
+                let tableHTML = `<h3>${selectedMonth} 月度汇总 (共 ${recordsInMonth.length} 天记录)</h3><table><tr><th>班级</th><th>姓名</th><th>出勤天数</th><th>出勤率</th></tr>`;
+                Object.values(monthlyData).sort((a, b) => a.name.localeCompare(b.name)).forEach(data => {
+                    const rate = ((data.attended / recordsInMonth.length) * 100).toFixed(0) + '%';
+                    tableHTML += `<tr><td>${data.class}</td><td>${data.name}</td><td>${data.attended}</td><td>${rate}</td></tr>`;
+                });
+                container.innerHTML = tableHTML + '</table>';
+            };
+            const populateMonthSelector = () => {
+                const selector = document.getElementById('monthSelector');
+                selector.innerHTML = '';
+                const months = [...new Set(Object.keys(history).map(date => date.substring(0, 7)))].sort().reverse();
+                if (months.length === 0) { selector.style.display = 'none'; document.getElementById('monthlySummaryContainer').innerHTML = '<p>暂无历史记录可供汇总。</p>'; return; }
+                selector.style.display = 'block';
+                months.forEach(month => { const option = document.createElement('option'); option.value = month; option.textContent = month; selector.appendChild(option); });
+                generateMonthlySummary(months[0]);
+                selector.addEventListener('change', () => generateMonthlySummary(selector.value));
+            };
+
+            // --- 事件监听 (单一、干净的绑定) ---
             searchInput.addEventListener('input', renderStudentList);
-
-            manageModeToggle.addEventListener('change', (e) => {
-                appContainer.classList.toggle('management-mode', e.target.checked);
-            });
-
+            manageModeToggle.addEventListener('change', e => appContainer.classList.toggle('management-mode', e.target.checked));
             addStudentBtn.addEventListener('click', () => {
-                const className = newClassInput.value.trim();
-                const name = newNameInput.value.trim();
+                const className = newClassInput.value.trim(); const name = newNameInput.value.trim();
                 if (!className || !name) { alert('班级和姓名不能为空！'); return; }
-                if (students.some(s => s.class === className && s.name === name)) {
-                    alert('该学生已存在！'); return;
-                }
+                if (students.some(s => s.class === className && s.name === name)) { alert('该学生已存在！'); return; }
                 students.push({ class: className, name: name, checked: false });
-                newClassInput.value = ''; newNameInput.value = '';
-                saveStudents();
+                newClassInput.value = ''; newNameInput.value = ''; saveStudents();
             });
-
             manualAddBtn.addEventListener('click', () => {
                 if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
+                    const file = fileInput.files[0]; const reader = new FileReader();
+                    reader.onload = e => {
                         let studentData = [];
                         try {
-                            if (file.name.endsWith('.csv')) {
-                                studentData = Papa.parse(e.target.result, { header: false }).data;
-                            } else {
-                                const wb = XLSX.read(e.target.result, { type: 'binary' });
-                                studentData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                            }
+                            if (file.name.endsWith('.csv')) studentData = Papa.parse(e.target.result, { header: false }).data;
+                            else { const wb = XLSX.read(e.target.result, { type: 'binary' }); studentData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }); }
                             const newStudents = studentData.map(row => ({ class: `${row[0] || ''}`.trim(), name: `${row[1] || ''}`.trim(), checked: false })).filter(s => s.class && s.name);
                             handleBulkImport(newStudents);
                         } catch (error) { alert('文件解析失败！'); }
                     };
-                    if (file.name.endsWith('.csv')) reader.readAsText(file, 'UTF-8');
-                    else reader.readAsBinaryString(file);
+                    if (file.name.endsWith('.csv')) reader.readAsText(file, 'UTF-8'); else reader.readAsBinaryString(file);
                 } else {
                     const text = manualInput.value.trim();
                     if (!text) { alert('请选择文件或在文本框中输入名单！'); return; }
@@ -571,50 +648,55 @@
                     handleBulkImport(newStudents);
                 }
             });
-
-            resetBtn.addEventListener('click', () => {
-                if (students.length > 0 && confirm('确定要重置所有学生的签到状态吗？')) {
-                    students.forEach(s => s.checked = false);
-                    saveStudents();
-                }
-            });
-
-            statsBtn.addEventListener('click', () => {
-                if (students.length === 0) { alert('暂无数据，无法统计。'); return; }
-                const statsByClass = students.reduce((acc, s) => {
-                    if (!acc[s.class]) acc[s.class] = { total: 0, checkedIn: 0 };
-                    acc[s.class].total++;
-                    if (s.checked) acc[s.class].checkedIn++;
-                    return acc;
-                }, {});
-                let tableHTML = '<table id="statsTable"><tr><th>班级</th><th>应到</th><th>实到</th><th>未到</th><th>签到率</th></tr>';
-                Object.keys(statsByClass).sort().forEach(className => {
-                    const data = statsByClass[className];
-                    const notCheckedIn = data.total - data.checkedIn;
-                    const rate = data.total > 0 ? ((data.checkedIn / data.total) * 100).toFixed(1) + '%' : 'N/A';
-                    tableHTML += `<tr><td>${className}</td><td>${data.total}</td><td>${data.checkedIn}</td><td>${notCheckedIn}</td><td>${rate}</td></tr>`;
-                });
-                tableHTML += '</table>';
-                document.getElementById('statsTableContainer').innerHTML = tableHTML;
-                statsModal.style.display = 'block';
-            });
-
+            resetBtn.addEventListener('click', () => { if (students.length > 0 && confirm('确定要重置所有学生的签到状态吗？')) { students.forEach(s => s.checked = false); saveStudents(); } });
             exportBtn.addEventListener('click', () => {
                 if (students.length === 0) { alert('没有数据可导出！'); return; }
                 let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-                csvContent += "班级,姓名,签到状态\r\n";
+                csvContent += "班级,姓名,当前签到状态\r\n";
                 students.forEach(s => { csvContent += `"${s.class}","${s.name}","${s.checked ? '已签到' : '未签到'}"\r\n`; });
                 const link = document.createElement("a");
                 link.href = encodeURI(csvContent);
-                link.download = `签到详细记录-${new Date().toISOString().slice(0, 10)}.csv`;
+                link.download = `学生名单及签到状态-${new Date().toISOString().slice(0, 10)}.csv`;
                 link.click();
             });
-
-            closeBtn.addEventListener('click', () => { statsModal.style.display = 'none'; });
-            window.addEventListener('click', (event) => { if (event.target == statsModal) statsModal.style.display = 'none'; });
+            statsBtn.addEventListener('click', () => {
+                if (students.length === 0) { alert('暂无数据，无法统计。'); return; }
+                const statsByClass = students.reduce((acc, s) => { (acc[s.class] = acc[s.class] || { total: 0, checkedIn: 0 }); acc[s.class].total++; if (s.checked) acc[s.class].checkedIn++; return acc; }, {});
+                let tableHTML = '<table><tr><th>班级</th><th>应到</th><th>实到</th><th>未到</th><th>签到率</th></tr>';
+                Object.keys(statsByClass).sort().forEach(className => {
+                    const data = statsByClass[className]; const notCheckedIn = data.total - data.checkedIn;
+                    const rate = data.total > 0 ? ((data.checkedIn / data.total) * 100).toFixed(1) + '%' : 'N/A';
+                    tableHTML += `<tr><td>${className}</td><td>${data.total}</td><td>${data.checkedIn}</td><td>${notCheckedIn}</td><td>${rate}</td></tr>`;
+                });
+                document.getElementById('statsTableContainer').innerHTML = tableHTML + '</table>';
+                statsModal.style.display = 'block';
+            });
+            saveHistoryBtn.addEventListener('click', () => {
+                if (students.length === 0) { alert('名单为空，无法保存记录。'); return; }
+                const today = new Date().toISOString().slice(0, 10);
+                if (history[today] && !confirm(`今天 (${today}) 已有保存记录，是否要覆盖？`)) return;
+                history[today] = JSON.parse(JSON.stringify(students));
+                saveHistory();
+                alert(`已成功保存 ${today} 的签到记录！`);
+            });
+            viewHistoryBtn.addEventListener('click', () => {
+                historyModal.style.display = 'block';
+                populateDateList(); populateMonthSelector();
+                document.querySelector('#historyTabs button[data-tab="daily"]').click();
+            });
+            historyTabs.addEventListener('click', e => {
+                if (e.target.tagName === 'BUTTON') {
+                    document.querySelectorAll('#historyTabs button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active'); const tab = e.target.dataset.tab;
+                    document.getElementById('dailyView').style.display = tab === 'daily' ? 'block' : 'none';
+                    document.getElementById('monthlyView').style.display = tab === 'monthly' ? 'block' : 'none';
+                }
+            });
+            document.querySelectorAll('.modal .close-btn').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal').style.display = 'none'));
+            window.addEventListener('click', event => { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; });
 
             // --- 初始加载 ---
-            loadStudents();
+            loadData();
         });
     </script>
 </body>
