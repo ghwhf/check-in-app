@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生签到系统 (智能版)</title>
+    <title>学生签到系统 (稳定版)</title>
 
     <style>
         :root {
@@ -506,10 +506,7 @@
 
             const resetCheckinStatus = (force = false) => {
                 if (force || confirm('确定要重置所有学生的签到状态吗？')) {
-                    students.forEach(s => {
-                        s.checked = false;
-                        s.checkinTime = null;
-                    });
+                    students.forEach(s => { s.checked = false; s.checkinTime = null; });
                     saveStudents();
                 }
             };
@@ -518,19 +515,15 @@
                 const savedStudents = localStorage.getItem('students_v9');
                 const savedHistory = localStorage.getItem('checkin_history_v9');
                 const lastActiveDate = localStorage.getItem('last_active_date_v9');
-
                 if (savedStudents) students = JSON.parse(savedStudents);
                 if (savedHistory) history = JSON.parse(savedHistory);
-
-                // **核心修改：智能隔日重置**
                 const today = getToday();
                 if (lastActiveDate && lastActiveDate !== today) {
                     if (confirm(`欢迎来到新的一天 (${today})！\n是否需要清空昨日的签到状态，开始今天的签到？\n（若昨日记录未保存，请先取消并手动保存）`)) {
-                        resetCheckinStatus(true); // 强制重置，不二次确认
+                        resetCheckinStatus(true);
                     }
                 }
                 localStorage.setItem('last_active_date_v9', today);
-
                 renderStudentList();
             };
 
@@ -543,30 +536,7 @@
                 localStorage.setItem('checkin_history_v9', JSON.stringify(history));
             };
 
-            const renderStudentList = () => { /* ... 与上版相同 ... */ };
-            const updateStats = () => { /* ... 与上版相同 ... */ };
-            const handleBulkImport = (newStudents) => { /* ... 与上版相同 ... */ };
-            const showDailyDetail = date => { /* ... 与上版相同 ... */ };
-            const populateDateList = () => { /* ... 与上版相同 ... */ };
-            const generateMonthlySummary = selectedMonth => { /* ... 与上版相同 ... */ };
-            const populateMonthSelector = () => { /* ... 与上版相同 ... */ };
-
-            // --- 事件监听 ---
-            searchInput.addEventListener('input', renderStudentList);
-            manageModeToggle.addEventListener('change', e => appContainer.classList.toggle('management-mode', e.target.checked));
-            addStudentBtn.addEventListener('click', () => { /* ... 与上版相同 ... */ });
-            manualAddBtn.addEventListener('click', () => { /* ... 与上版相同 ... */ });
-            resetBtn.addEventListener('click', () => resetCheckinStatus(false));
-            exportBtn.addEventListener('click', () => { /* ... 与上版相同 ... */ });
-            statsBtn.addEventListener('click', () => { /* ... 与上版相同 ... */ });
-            saveHistoryBtn.addEventListener('click', () => { /* ... 与上版相同 ... */ });
-            viewHistoryBtn.addEventListener('click', () => { /* ... 与上版相同 ... */ });
-            historyTabs.addEventListener('click', e => { /* ... 与上版相同 ... */ });
-            document.querySelectorAll('.modal .close-btn').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal').style.display = 'none'));
-            window.addEventListener('click', event => { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; });
-
-            // --- 完整功能代码粘贴区 (为简洁，只粘贴有修改或关键的函数) ---
-            renderStudentList = () => {
+            const renderStudentList = () => {
                 const searchTerm = searchInput.value.toLowerCase();
                 studentListContainer.innerHTML = '';
                 const filteredStudents = students.filter(s => s.name.toLowerCase().includes(searchTerm));
@@ -620,14 +590,14 @@
                 });
                 updateStats();
             };
-            updateStats = () => {
+            const updateStats = () => {
                 const total = students.length;
                 statsDiv.innerHTML = ''; if (total === 0) return;
                 const checkedIn = students.filter(s => s.checked).length;
                 const percentage = total > 0 ? ((checkedIn / total) * 100).toFixed(1) : 0;
                 statsDiv.innerHTML = `<div class="stat-item"><h3>总人数</h3><p>${total}</p></div><div class="stat-item"><h3>已签到</h3><p>${checkedIn}</p></div><div class="stat-item"><h3>未签到</h3><p>${total - checkedIn}</p></div><div class="stat-item"><h3>签到率</h3><p>${percentage}%</p></div>`;
             };
-            handleBulkImport = newStudents => {
+            const handleBulkImport = newStudents => {
                 if (newStudents.length > 0) {
                     if (confirm(`成功解析到 ${newStudents.length} 名学生。这将替换现有全部名单，确定吗？`)) {
                         students = newStudents.map(s => ({ ...s, checked: false, checkinTime: null }));
@@ -636,23 +606,141 @@
                     }
                 } else { alert('未解析到有效数据。请检查文件或文本格式。'); }
             };
-            addStudentBtn.onclick = () => {
+
+            const showDailyDetail = date => {
+                const record = history[date];
+                const container = document.getElementById('dailyRecordContainer');
+                let tableHTML = `<h3>${date} 签到详情</h3><table><tr><th>班级</th><th>姓名</th><th>状态</th><th>签到时间</th></tr>`;
+                record.forEach(student => {
+                    const status = student.checked ? '✔️ 已签到' : '❌ 未签到';
+                    const time = student.checked && student.checkinTime ? student.checkinTime : 'N/A';
+                    tableHTML += `<tr><td>${student.class}</td><td>${student.name}</td><td>${status}</td><td>${time}</td></tr>`;
+                });
+                container.innerHTML = tableHTML + '</table>';
+            };
+            const populateDateList = () => {
+                const container = document.getElementById('dateListContainer');
+                container.innerHTML = ''; document.getElementById('dailyRecordContainer').innerHTML = '';
+                const dates = Object.keys(history).sort().reverse();
+                if (dates.length === 0) { container.innerHTML = '<p>暂无历史记录。</p>'; return; }
+                dates.forEach(date => { const dateBtn = document.createElement('button'); dateBtn.textContent = date; dateBtn.addEventListener('click', () => showDailyDetail(date)); container.appendChild(dateBtn); });
+            };
+            const generateMonthlySummary = selectedMonth => {
+                const container = document.getElementById('monthlySummaryContainer');
+                const monthlyData = {};
+                const recordsInMonth = Object.keys(history).filter(date => date.startsWith(selectedMonth));
+                if (recordsInMonth.length === 0) { container.innerHTML = `<p>该月份 (${selectedMonth}) 没有签到记录。</p>`; return; }
+                recordsInMonth.forEach(date => {
+                    history[date].forEach(student => {
+                        const studentId = `${student.class}-${student.name}`;
+                        if (!monthlyData[studentId]) monthlyData[studentId] = { class: student.class, name: student.name, attended: 0 };
+                        if (student.checked) monthlyData[studentId].attended++;
+                    });
+                });
+                let tableHTML = `<h3>${selectedMonth} 月度汇总 (共 ${recordsInMonth.length} 天记录)</h3><table><tr><th>班级</th><th>姓名</th><th>出勤天数</th><th>出勤率</th></tr>`;
+                Object.values(monthlyData).sort((a, b) => a.name.localeCompare(b.name)).forEach(data => {
+                    const rate = ((data.attended / recordsInMonth.length) * 100).toFixed(0) + '%';
+                    tableHTML += `<tr><td>${data.class}</td><td>${data.name}</td><td>${data.attended}</td><td>${rate}</td></tr>`;
+                });
+                container.innerHTML = tableHTML + '</table>';
+            };
+            const populateMonthSelector = () => {
+                const selector = document.getElementById('monthSelector');
+                selector.innerHTML = '';
+                const months = [...new Set(Object.keys(history).map(date => date.substring(0, 7)))].sort().reverse();
+                if (months.length === 0) { selector.style.display = 'none'; document.getElementById('monthlySummaryContainer').innerHTML = '<p>暂无历史记录可供汇总。</p>'; return; }
+                selector.style.display = 'block';
+                months.forEach(month => { const option = document.createElement('option'); option.value = month; option.textContent = month; selector.appendChild(option); });
+                generateMonthlySummary(months[0]);
+                selector.addEventListener('change', () => generateMonthlySummary(selector.value));
+            };
+
+            // --- 事件监听 (单一、干净、正确的绑定) ---
+            searchInput.addEventListener('input', renderStudentList);
+            manageModeToggle.addEventListener('change', e => appContainer.classList.toggle('management-mode', e.target.checked));
+            addStudentBtn.addEventListener('click', () => {
                 const className = newClassInput.value.trim(); const name = newNameInput.value.trim();
                 if (!className || !name) { alert('班级和姓名不能为空！'); return; }
                 if (students.some(s => s.class === className && s.name === name)) { alert('该学生已存在！'); return; }
                 students.push({ class: className, name: name, checked: false, checkinTime: null });
                 newClassInput.value = ''; newNameInput.value = ''; saveStudents();
-            };
-            // ... [其他功能函数与上版相同，已由事件监听器正确绑定] ...
-            saveHistoryBtn.onclick = () => {
+            });
+
+            // **修正：恢复 manualAddBtn 的事件监听器**
+            manualAddBtn.addEventListener('click', () => {
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0]; const reader = new FileReader();
+                    reader.onload = e => {
+                        let studentData = [];
+                        try {
+                            if (file.name.endsWith('.csv')) studentData = Papa.parse(e.target.result, { header: false }).data;
+                            else { const wb = XLSX.read(e.target.result, { type: 'binary' }); studentData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }); }
+                            const newStudents = studentData.map(row => ({ class: `${row[0] || ''}`.trim(), name: `${row[1] || ''}`.trim() })).filter(s => s.class && s.name);
+                            handleBulkImport(newStudents);
+                        } catch (error) { alert('文件解析失败！'); }
+                    };
+                    if (file.name.endsWith('.csv')) reader.readAsText(file, 'UTF-8'); else reader.readAsBinaryString(file);
+                } else {
+                    const text = manualInput.value.trim();
+                    if (!text) { alert('请选择文件或在文本框中输入名单！'); return; }
+                    const newStudents = text.split('\n').map(line => {
+                        const parts = line.trim().split(/[\s,，\t]/).filter(Boolean);
+                        if (parts.length >= 2) return { class: parts[0], name: parts.slice(1).join(' ') };
+                        return null;
+                    }).filter(Boolean);
+                    handleBulkImport(newStudents);
+                }
+            });
+
+            resetBtn.addEventListener('click', () => resetCheckinStatus(false));
+            exportBtn.addEventListener('click', () => {
+                if (students.length === 0) { alert('没有数据可导出！'); return; }
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                csvContent += "班级,姓名,当前签到状态,签到时间\r\n";
+                students.forEach(s => {
+                    const time = s.checkinTime || '';
+                    csvContent += `"${s.class}","${s.name}","${s.checked ? '已签到' : '未签到'}","${time}"\r\n`;
+                });
+                const link = document.createElement("a");
+                link.href = encodeURI(csvContent);
+                link.download = `学生名单及签到状态-${getToday()}.csv`;
+                link.click();
+            });
+            statsBtn.addEventListener('click', () => {
+                if (students.length === 0) { alert('暂无数据，无法统计。'); return; }
+                const statsByClass = students.reduce((acc, s) => { (acc[s.class] = acc[s.class] || { total: 0, checkedIn: 0 }); acc[s.class].total++; if (s.checked) acc[s.class].checkedIn++; return acc; }, {});
+                let tableHTML = '<table><tr><th>班级</th><th>应到</th><th>实到</th><th>未到</th><th>签到率</th></tr>';
+                Object.keys(statsByClass).sort().forEach(className => {
+                    const data = statsByClass[className]; const notCheckedIn = data.total - data.checkedIn;
+                    const rate = data.total > 0 ? ((data.checkedIn / data.total) * 100).toFixed(1) + '%' : 'N/A';
+                    tableHTML += `<tr><td>${className}</td><td>${data.total}</td><td>${data.checkedIn}</td><td>${notCheckedIn}</td><td>${rate}</td></tr>`;
+                });
+                document.getElementById('statsTableContainer').innerHTML = tableHTML + '</table>';
+                statsModal.style.display = 'block';
+            });
+            saveHistoryBtn.addEventListener('click', () => {
                 if (students.length === 0) { alert('名单为空，无法保存记录。'); return; }
                 const today = getToday();
                 if (history[today] && !confirm(`今天 (${today}) 已有保存记录，是否要覆盖？`)) return;
                 history[today] = JSON.parse(JSON.stringify(students));
                 saveHistory();
                 alert(`已成功保存 ${today} 的签到记录！`);
-            };
-            // ... [其余所有函数均与上版相同且已正确绑定] ...
+            });
+            viewHistoryBtn.addEventListener('click', () => {
+                historyModal.style.display = 'block';
+                populateDateList(); populateMonthSelector();
+                document.querySelector('#historyTabs button[data-tab="daily"]').click();
+            });
+            historyTabs.addEventListener('click', e => {
+                if (e.target.tagName === 'BUTTON') {
+                    document.querySelectorAll('#historyTabs button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active'); const tab = e.target.dataset.tab;
+                    document.getElementById('dailyView').style.display = tab === 'daily' ? 'block' : 'none';
+                    document.getElementById('monthlyView').style.display = tab === 'monthly' ? 'block' : 'none';
+                }
+            });
+            document.querySelectorAll('.modal .close-btn').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal').style.display = 'none'));
+            window.addEventListener('click', event => { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; });
 
             // --- 初始加载 ---
             loadData();
