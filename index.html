@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生签到系统 (稳定版)</title>
+    <title>学生签到系统 (最终稳定版)</title>
 
     <style>
         :root {
@@ -502,7 +502,14 @@
             let students = [];
             let history = {};
 
-            const getToday = () => new Date().toISOString().slice(0, 10);
+            // **核心修正：强制使用本地日期**
+            const getToday = () => {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
 
             const resetCheckinStatus = (force = false) => {
                 if (force || confirm('确定要重置所有学生的签到状态吗？')) {
@@ -512,28 +519,31 @@
             };
 
             const loadData = () => {
-                const savedStudents = localStorage.getItem('students_v9');
-                const savedHistory = localStorage.getItem('checkin_history_v9');
-                const lastActiveDate = localStorage.getItem('last_active_date_v9');
+                const savedStudents = localStorage.getItem('students_v10');
+                const savedHistory = localStorage.getItem('checkin_history_v10');
+                const lastActiveDate = localStorage.getItem('last_active_date_v10');
+
                 if (savedStudents) students = JSON.parse(savedStudents);
                 if (savedHistory) history = JSON.parse(savedHistory);
+
                 const today = getToday();
                 if (lastActiveDate && lastActiveDate !== today) {
                     if (confirm(`欢迎来到新的一天 (${today})！\n是否需要清空昨日的签到状态，开始今天的签到？\n（若昨日记录未保存，请先取消并手动保存）`)) {
                         resetCheckinStatus(true);
                     }
                 }
-                localStorage.setItem('last_active_date_v9', today);
+                localStorage.setItem('last_active_date_v10', today);
+
                 renderStudentList();
             };
 
             const saveStudents = () => {
-                localStorage.setItem('students_v9', JSON.stringify(students));
-                localStorage.setItem('last_active_date_v9', getToday());
+                localStorage.setItem('students_v10', JSON.stringify(students));
+                localStorage.setItem('last_active_date_v10', getToday());
                 renderStudentList();
             };
             const saveHistory = () => {
-                localStorage.setItem('checkin_history_v9', JSON.stringify(history));
+                localStorage.setItem('checkin_history_v10', JSON.stringify(history));
             };
 
             const renderStudentList = () => {
@@ -655,7 +665,6 @@
                 selector.addEventListener('change', () => generateMonthlySummary(selector.value));
             };
 
-            // --- 事件监听 (单一、干净、正确的绑定) ---
             searchInput.addEventListener('input', renderStudentList);
             manageModeToggle.addEventListener('change', e => appContainer.classList.toggle('management-mode', e.target.checked));
             addStudentBtn.addEventListener('click', () => {
@@ -665,8 +674,6 @@
                 students.push({ class: className, name: name, checked: false, checkinTime: null });
                 newClassInput.value = ''; newNameInput.value = ''; saveStudents();
             });
-
-            // **修正：恢复 manualAddBtn 的事件监听器**
             manualAddBtn.addEventListener('click', () => {
                 if (fileInput.files.length > 0) {
                     const file = fileInput.files[0]; const reader = new FileReader();
@@ -691,7 +698,6 @@
                     handleBulkImport(newStudents);
                 }
             });
-
             resetBtn.addEventListener('click', () => resetCheckinStatus(false));
             exportBtn.addEventListener('click', () => {
                 if (students.length === 0) { alert('没有数据可导出！'); return; }
@@ -742,7 +748,6 @@
             document.querySelectorAll('.modal .close-btn').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal').style.display = 'none'));
             window.addEventListener('click', event => { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; });
 
-            // --- 初始加载 ---
             loadData();
         });
     </script>
