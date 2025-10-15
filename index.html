@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>学生签到系统 (优化版)</title>
+    <title>学生签到系统 (最终稳定版)</title>
 
     <style>
         :root {
@@ -18,11 +18,6 @@
             --medium-gray: #f2f2f7;
             --dark-gray: #333;
             --text-gray: #6c757d;
-            --border-color: #e5e5ea;
-        }
-
-        * {
-            box-sizing: border-box;
         }
 
         body {
@@ -32,7 +27,6 @@
             margin: 0;
             padding: 15px;
             -webkit-font-smoothing: antialiased;
-            line-height: 1.5;
         }
 
         .container {
@@ -64,7 +58,6 @@
             background-color: var(--light-gray);
             padding: 15px;
             border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .stat-item h3 {
@@ -91,7 +84,7 @@
         #searchInput {
             width: 100%;
             padding: 14px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e5e5ea;
             border-radius: 12px;
             font-size: 16px;
             box-sizing: border-box;
@@ -105,7 +98,7 @@
         }
 
         details {
-            border: 1px solid var(--border-color);
+            border: 1px solid #e5e5ea;
             border-radius: 12px;
             padding: 10px 15px;
             transition: background-color 0.2s;
@@ -119,21 +112,6 @@
             font-weight: 600;
             cursor: pointer;
             padding: 5px 0;
-            outline: none;
-        }
-
-        summary::-webkit-details-marker {
-            display: none;
-        }
-
-        summary::before {
-            content: '▶ ';
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-
-        details[open] summary::before {
-            transform: rotate(90deg);
         }
 
         .management-area {
@@ -152,41 +130,33 @@
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
-            flex-wrap: wrap;
         }
 
         .add-student-form input {
             flex: 1;
-            min-width: 120px;
             padding: 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #ccc;
             border-radius: 10px;
         }
 
         .add-student-form button {
             padding: 12px 18px;
             border: none;
-            background-color: var(--purple-color);
+            background-color: #5a67d8;
             color: white;
             border-radius: 10px;
             cursor: pointer;
             font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .add-student-form button:hover {
-            background-color: #4a47c4;
         }
 
         #manualInput {
             width: 100%;
             min-height: 80px;
             padding: 10px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #ccc;
             border-radius: 10px;
             box-sizing: border-box;
             font-size: 14px;
-            resize: vertical;
         }
 
         #manualAddBtn {
@@ -200,10 +170,6 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 500;
-        }
-
-        #manualAddBtn:hover {
-            background-color: #0062cc;
         }
 
         .manage-toggle {
@@ -277,13 +243,7 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 500;
-            transition: transform 0.1s, background-color 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .action-buttons button:hover,
-        #saveHistoryBtn:hover {
-            opacity: 0.9;
+            transition: transform 0.1s, background-color 0.2s;
         }
 
         .action-buttons button:active,
@@ -313,10 +273,6 @@
             background-color: var(--text-gray);
         }
 
-        #resetBtn:hover {
-            background-color: #5a6268;
-        }
-
         .class-group h2 {
             background-color: var(--medium-gray);
             padding: 10px 15px;
@@ -332,19 +288,13 @@
             align-items: center;
             justify-content: space-between;
             padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid #f2f2f7;
             font-size: 18px;
-            transition: background-color 0.2s;
-        }
-
-        .student-list .student-item:last-child {
-            border-bottom: none;
         }
 
         .student-item label {
             flex-grow: 1;
             padding: 5px 0;
-            cursor: pointer;
         }
 
         .student-item.checked label {
@@ -362,7 +312,6 @@
             white-space: nowrap;
             min-width: 85px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .checkin-btn.not-checked {
@@ -376,10 +325,6 @@
             font-size: 12px;
         }
 
-        .checkin-btn:hover {
-            opacity: 0.9;
-        }
-
         .delete-btn {
             padding: 10px 18px;
             background: var(--danger-color);
@@ -387,12 +332,6 @@
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            margin-left: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .delete-btn:hover {
-            background-color: #d32f2f;
         }
 
         .checkin-btn {
@@ -432,7 +371,6 @@
             max-width: 700px;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .close-btn {
@@ -441,11 +379,6 @@
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            line-height: 1;
-        }
-
-        .close-btn:hover {
-            color: #000;
         }
 
         .modal-header {
@@ -469,11 +402,6 @@
             background: #eee;
             cursor: pointer;
             border-radius: 10px;
-            transition: background-color 0.2s;
-        }
-
-        #historyTabs button:hover {
-            background: #ddd;
         }
 
         #historyTabs button.active {
@@ -492,11 +420,6 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .date-list button:hover {
-            background: #e2e6ea;
         }
 
         table {
@@ -514,61 +437,6 @@
 
         th {
             background-color: var(--medium-gray);
-            font-weight: 600;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: var(--text-gray);
-            padding: 40px 20px;
-            font-style: italic;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1001;
-            transform: translateX(120%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-color: #f5c6cb;
-        }
-
-        @media (max-width: 600px) {
-            .action-buttons {
-                grid-template-columns: 1fr;
-            }
-
-            #stats {
-                grid-template-columns: 1fr;
-            }
-
-            .add-student-form {
-                flex-direction: column;
-            }
-
-            .add-student-form input {
-                min-width: auto;
-            }
         }
     </style>
 </head>
@@ -584,21 +452,18 @@
                 <div class="management-area">
                     <h3>添加单个学生</h3>
                     <div class="add-student-form">
-                        <input type="text" id="newClassInput" placeholder="班级">
-                        <input type="text" id="newNameInput" placeholder="姓名">
-                        <button id="addStudentBtn">添加</button>
+                        <input type="text" id="newClassInput" placeholder="班级"><input type="text" id="newNameInput"
+                            placeholder="姓名"><button id="addStudentBtn">添加</button>
                     </div>
                     <h3>从文件或文本批量导入</h3>
                     <input type="file" id="fileInput" accept=".csv, .xlsx, .xls"
                         style="margin-bottom: 10px; width: 100%;">
-                    <textarea id="manualInput" placeholder="或在此粘贴名单 (格式: 班级 姓名 或 班级,姓名)"></textarea>
+                    <textarea id="manualInput" placeholder="或在此粘贴名单 (格式: 班级 姓名)"></textarea>
                     <button id="manualAddBtn">导入/更新</button>
                     <div class="manage-toggle">
                         <label for="manageModeToggle">编辑名单</label>
-                        <label class="switch">
-                            <input type="checkbox" id="manageModeToggle">
-                            <span class="slider"></span>
-                        </label>
+                        <label class="switch"><input type="checkbox" id="manageModeToggle"><span
+                                class="slider"></span></label>
                     </div>
                 </div>
             </details>
@@ -619,48 +484,35 @@
     </div>
 
     <div id="statsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close-btn">&times;</span>
-                <h2>班级统计</h2>
-            </div>
-            <div class="modal-body">
-                <div id="statsTableContainer"></div>
-            </div>
+        <div class="modal-content"><span class="close-btn">&times;</span>
+            <h2>班级统计</h2>
+            <div id="statsTableContainer"></div>
         </div>
     </div>
-
     <div id="historyModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span class="close-btn">&times;</span>
+            <div class="modal-header"><span class="close-btn">&times;</span>
                 <h2>历史记录</h2>
             </div>
             <div class="modal-body">
-                <div id="historyTabs">
-                    <button class="active" data-tab="daily">按日期查看</button>
-                    <button data-tab="monthly">按月份汇总</button>
-                </div>
+                <div id="historyTabs"><button class="active" data-tab="daily">按日期查看</button><button
+                        data-tab="monthly">按月份汇总</button></div>
                 <div id="dailyView">
                     <div id="dateListContainer"></div>
                     <div id="dailyRecordContainer"></div>
                 </div>
-                <div id="monthlyView" style="display: none;">
-                    <select id="monthSelector"></select>
+                <div id="monthlyView" style="display: none;"><select id="monthSelector"></select>
                     <div id="monthlySummaryContainer"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="notification" class="notification"></div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/paparse.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // DOM 元素引用
             const appContainer = document.getElementById('app-container');
             const studentListContainer = document.getElementById('studentListContainer');
             const searchInput = document.getElementById('searchInput');
@@ -680,13 +532,10 @@
             const historyModal = document.getElementById('historyModal');
             const statsModal = document.getElementById('statsModal');
             const historyTabs = document.getElementById('historyTabs');
-            const notification = document.getElementById('notification');
 
-            // 应用状态
             let students = [];
             let history = {};
 
-            // 获取当前日期
             const getToday = () => {
                 const now = new Date();
                 const year = now.getFullYear();
@@ -695,594 +544,206 @@
                 return `${year}-${month}-${day}`;
             };
 
-            // 显示通知
-            const showNotification = (message, isError = false) => {
-                notification.textContent = message;
-                notification.className = 'notification ' + (isError ? 'error' : '');
-                notification.classList.add('show');
-
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            };
-
-            // 重置签到状态
             const resetCheckinStatus = (force = false) => {
-                if (!force && !confirm('确定要重置所有学生的签到状态吗？')) {
-                    return;
+                if (force || confirm('确定要重置所有学生的签到状态吗？')) {
+                    students.forEach(s => { s.checked = false; s.checkinTime = null; });
+                    saveStudents();
                 }
-
-                students.forEach(s => {
-                    s.checked = false;
-                    s.checkinTime = null;
-                });
-                saveStudents();
-                showNotification('签到状态已重置');
             };
 
-            // 加载数据
             const loadData = () => {
-                try {
-                    const savedStudents = localStorage.getItem('students_v13');
-                    const savedHistory = localStorage.getItem('checkin_history_v13');
-                    const lastActiveDate = localStorage.getItem('last_active_date_v13');
-
-                    if (savedStudents) {
-                        students = JSON.parse(savedStudents);
+                const savedStudents = localStorage.getItem('students_v12');
+                const savedHistory = localStorage.getItem('checkin_history_v12');
+                const lastActiveDate = localStorage.getItem('last_active_date_v12');
+                if (savedStudents) students = JSON.parse(savedStudents);
+                if (savedHistory) history = JSON.parse(savedHistory);
+                const today = getToday();
+                if (lastActiveDate && lastActiveDate !== today) {
+                    if (confirm(`欢迎来到新的一天 (${today})！\n是否需要清空昨日的签到状态，开始今天的签到？\n（若昨日记录未保存，请先取消并手动保存）`)) {
+                        resetCheckinStatus(true);
                     }
-                    if (savedHistory) {
-                        history = JSON.parse(savedHistory);
-                    }
-
-                    const today = getToday();
-                    if (lastActiveDate && lastActiveDate !== today) {
-                        if (confirm(`欢迎来到新的一天 (${today})！\n是否需要清空昨日的签到状态，开始今天的签到？\n（若昨日记录未保存，请先取消并手动保存）`)) {
-                            resetCheckinStatus(true);
-                        }
-                    }
-
-                    localStorage.setItem('last_active_date_v13', today);
-                    renderStudentList();
-                } catch (error) {
-                    console.error('加载数据失败:', error);
-                    showNotification('加载数据失败，请刷新页面重试', true);
                 }
+                localStorage.setItem('last_active_date_v12', today);
+                renderStudentList();
             };
 
-            // 保存学生数据
             const saveStudents = (shouldRender = true) => {
-                try {
-                    localStorage.setItem('students_v13', JSON.stringify(students));
-                    localStorage.setItem('last_active_date_v13', getToday());
-                    if (shouldRender) renderStudentList();
-                } catch (error) {
-                    console.error('保存数据失败:', error);
-                    showNotification('保存数据失败', true);
-                }
+                localStorage.setItem('students_v12', JSON.stringify(students));
+                localStorage.setItem('last_active_date_v12', getToday());
+                if (shouldRender) renderStudentList();
             };
+            const saveHistory = () => localStorage.setItem('checkin_history_v12', JSON.stringify(history));
 
-            // 保存历史记录
-            const saveHistory = () => {
-                try {
-                    localStorage.setItem('checkin_history_v13', JSON.stringify(history));
-                } catch (error) {
-                    console.error('保存历史失败:', error);
-                    showNotification('保存历史失败', true);
-                }
-            };
-
-            // 渲染学生列表
             const renderStudentList = () => {
                 const searchTerm = searchInput.value.toLowerCase();
                 studentListContainer.innerHTML = '';
+                const filteredStudents = students.filter(s => s.name.toLowerCase().includes(searchTerm));
+                if (filteredStudents.length === 0 && students.length > 0) studentListContainer.innerHTML = '<p style="text-align: center; color: var(--text-gray);">无搜索结果。</p>';
+                else if (students.length === 0) studentListContainer.innerHTML = '<p style="text-align: center; color: var(--text-gray);">暂无学生名单。</p>';
+                const groupedByClass = filteredStudents.reduce((acc, student) => { (acc[student.class] = acc[student.class] || []).push(student); return acc; }, {});
 
-                const filteredStudents = students.filter(s =>
-                    s.name.toLowerCase().includes(searchTerm) ||
-                    s.class.toLowerCase().includes(searchTerm)
-                );
+                Object.keys(groupedByClass).sort().forEach(className => {
+                    const classGroupDiv = document.createElement('div');
+                    classGroupDiv.className = 'class-group';
+                    classGroupDiv.innerHTML = `<h2>${className}</h2><div class="student-list"></div>`;
+                    const studentListDiv = classGroupDiv.querySelector('.student-list');
 
-                if (filteredStudents.length === 0) {
-                    studentListContainer.innerHTML = '<div class="empty-state">暂无学生数据</div>';
-                    updateStats();
-                    return;
-                }
+                    groupedByClass[className].forEach(student => {
+                        const studentItem = document.createElement('div');
+                        studentItem.className = 'student-item';
+                        studentItem.dataset.id = `${student.class}-${student.name}`;
+                        if (student.checked) studentItem.classList.add('checked');
 
-                const groupedByClass = filteredStudents.reduce((acc, student) => {
-                    (acc[student.class] = acc[student.class] || []).push(student);
-                    return acc;
-                }, {});
+                        const label = document.createElement('label');
+                        label.textContent = student.name;
+                        const checkinButton = document.createElement('button');
+                        checkinButton.className = 'checkin-btn';
+                        if (student.checked && student.checkinTime) {
+                            checkinButton.innerHTML = `已签到 ✓<br><span style="font-size: 10px;">${student.checkinTime}</span>`;
+                            checkinButton.classList.add('is-checked');
+                        } else {
+                            checkinButton.innerHTML = '签到';
+                            checkinButton.classList.add('not-checked');
+                        }
+                        const deleteButton = document.createElement('button');
+                        deleteButton.className = 'delete-btn';
+                        deleteButton.textContent = '删除';
 
-                Object.keys(groupedByClass)
-                    .sort()
-                    .forEach(className => {
-                        const classGroupDiv = document.createElement('div');
-                        classGroupDiv.className = 'class-group';
-                        classGroupDiv.innerHTML = `<h2>${className}</h2><div class="student-list"></div>`;
-                        const studentListDiv = classGroupDiv.querySelector('.student-list');
-
-                        groupedByClass[className]
-                            .sort((a, b) => a.name.localeCompare(b.name))
-                            .forEach(student => {
-                                const studentItem = document.createElement('div');
-                                studentItem.className = `student-item ${student.checked ? 'checked' : ''}`;
-                                studentItem.dataset.id = `${student.class}-${student.name}`;
-
-                                const label = document.createElement('label');
-                                label.textContent = student.name;
-
-                                const checkinButton = document.createElement('button');
-                                checkinButton.className = 'checkin-btn';
-                                if (student.checked && student.checkinTime) {
-                                    checkinButton.innerHTML = `已签到 ✓<br><span style="font-size: 10px;">${student.checkinTime}</span>`;
-                                    checkinButton.classList.add('is-checked');
-                                } else {
-                                    checkinButton.innerHTML = '签到';
-                                    checkinButton.classList.add('not-checked');
-                                }
-
-                                const deleteButton = document.createElement('button');
-                                deleteButton.className = 'delete-btn';
-                                deleteButton.textContent = '删除';
-
-                                studentItem.appendChild(label);
-                                studentItem.appendChild(checkinButton);
-                                studentItem.appendChild(deleteButton);
-                                studentListDiv.appendChild(studentItem);
-                            });
-
-                        studentListContainer.appendChild(classGroupDiv);
+                        studentItem.appendChild(label);
+                        studentItem.appendChild(checkinButton);
+                        studentItem.appendChild(deleteButton);
+                        studentListDiv.appendChild(studentItem);
                     });
-
+                    studentListContainer.appendChild(classGroupDiv);
+                });
                 updateStats();
             };
 
-            // 处理学生点击事件
             studentListContainer.addEventListener('click', e => {
                 const target = e.target;
                 const studentItem = target.closest('.student-item');
                 if (!studentItem) return;
-
                 const studentId = studentItem.dataset.id;
                 const [studentClass, ...studentNameParts] = studentId.split('-');
                 const studentName = studentNameParts.join('-');
                 const originalIndex = students.findIndex(s => s.class === studentClass && s.name === studentName);
-
                 if (originalIndex === -1) return;
-
                 if (target.classList.contains('checkin-btn')) {
                     const isCheckingIn = !students[originalIndex].checked;
                     students[originalIndex].checked = isCheckingIn;
-                    students[originalIndex].checkinTime = isCheckingIn
-                        ? new Date().toLocaleTimeString('zh-CN', { hour12: false })
-                        : null;
-
+                    students[originalIndex].checkinTime = isCheckingIn ? new Date().toLocaleTimeString('zh-CN', { hour12: false }) : null;
                     studentItem.classList.toggle('checked', isCheckingIn);
-
                     if (isCheckingIn) {
                         target.innerHTML = `已签到 ✓<br><span style="font-size: 10px;">${students[originalIndex].checkinTime}</span>`;
-                        target.classList.remove('not-checked');
-                        target.classList.add('is-checked');
+                        target.classList.remove('not-checked'); target.classList.add('is-checked');
                     } else {
                         target.innerHTML = '签到';
-                        target.classList.remove('is-checked');
-                        target.classList.add('not-checked');
+                        target.classList.remove('is-checked'); target.classList.add('not-checked');
                     }
-
                     saveStudents(false);
                     updateStats();
                 }
-
                 if (target.classList.contains('delete-btn')) {
-                    if (confirm(`确定要删除学生 "${students[originalIndex].name}" 吗？`)) {
+                    if (confirm(`确定要删除学生 “${students[originalIndex].name}” 吗？`)) {
                         students.splice(originalIndex, 1);
                         saveStudents();
-                        showNotification('学生已删除');
                     }
                 }
             });
 
-            // 更新统计信息
-            const updateStats = () => {
-                const total = students.length;
-                statsDiv.innerHTML = '';
+            const updateStats = () => { const total = students.length; statsDiv.innerHTML = ''; if (total === 0) return; const checkedIn = students.filter(s => s.checked).length; const percentage = total > 0 ? ((checkedIn / total) * 100).toFixed(1) : 0; statsDiv.innerHTML = `<div class="stat-item"><h3>总人数</h3><p>${total}</p></div><div class="stat-item"><h3>已签到</h3><p>${checkedIn}</p></div><div class="stat-item"><h3>未签到</h3><p>${total - checkedIn}</p></div><div class="stat-item"><h3>签到率</h3><p>${percentage}%</p></div>`; };
+            const handleBulkImport = newStudents => { if (newStudents.length > 0) { if (confirm(`成功解析到 ${newStudents.length} 名学生。这将替换现有全部名单，确定吗？`)) { students = newStudents.map(s => ({ ...s, checked: false, checkinTime: null })); saveStudents(); alert('名单已成功更新！'); } } else { alert('未解析到有效数据。请检查文件或文本格式。'); } };
+            const showDailyDetail = date => { const record = history[date]; const container = document.getElementById('dailyRecordContainer'); let tableHTML = `<h3>${date} 签到详情</h3><table><tr><th>班级</th><th>姓名</th><th>状态</th><th>签到时间</th></tr>`; record.forEach(student => { const status = student.checked ? '✔️ 已签到' : '❌ 未签到'; const time = student.checked && student.checkinTime ? student.checkinTime : 'N/A'; tableHTML += `<tr><td>${student.class}</td><td>${student.name}</td><td>${status}</td><td>${time}</td></tr>`; }); container.innerHTML = tableHTML + '</table>'; };
+            const populateDateList = () => { const container = document.getElementById('dateListContainer'); container.innerHTML = ''; document.getElementById('dailyRecordContainer').innerHTML = ''; const dates = Object.keys(history).sort().reverse(); if (dates.length === 0) { container.innerHTML = '<p>暂无历史记录。</p>'; return; } dates.forEach(date => { const dateBtn = document.createElement('button'); dateBtn.textContent = date; dateBtn.addEventListener('click', () => showDailyDetail(date)); container.appendChild(dateBtn); }); };
+            const generateMonthlySummary = selectedMonth => { const container = document.getElementById('monthlySummaryContainer'); const monthlyData = {}; const recordsInMonth = Object.keys(history).filter(date => date.startsWith(selectedMonth)); if (recordsInMonth.length === 0) { container.innerHTML = `<p>该月份 (${selectedMonth}) 没有签到记录。</p>`; return; } recordsInMonth.forEach(date => { history[date].forEach(student => { const studentId = `${student.class}-${student.name}`; if (!monthlyData[studentId]) monthlyData[studentId] = { class: student.class, name: student.name, attended: 0 }; if (student.checked) monthlyData[studentId].attended++; }); }); let tableHTML = `<h3>${selectedMonth} 月度汇总 (共 ${recordsInMonth.length} 天记录)</h3><table><tr><th>班级</th><th>姓名</th><th>出勤天数</th><th>出勤率</th></tr>`; Object.values(monthlyData).sort((a, b) => a.name.localeCompare(b.name)).forEach(data => { const rate = ((data.attended / recordsInMonth.length) * 100).toFixed(0) + '%'; tableHTML += `<tr><td>${data.class}</td><td>${data.name}</td><td>${data.attended}</td><td>${rate}</td></tr>`; }); container.innerHTML = tableHTML + '</table>'; };
+            const populateMonthSelector = () => { const selector = document.getElementById('monthSelector'); selector.innerHTML = ''; const months = [...new Set(Object.keys(history).map(date => date.substring(0, 7)))].sort().reverse(); if (months.length === 0) { selector.style.display = 'none'; document.getElementById('monthlySummaryContainer').innerHTML = '<p>暂无历史记录可供汇总。</p>'; return; } selector.style.display = 'block'; months.forEach(month => { const option = document.createElement('option'); option.value = month; option.textContent = month; selector.appendChild(option); }); generateMonthlySummary(months[0]); selector.addEventListener('change', () => generateMonthlySummary(selector.value)); };
 
-                if (total === 0) {
-                    statsDiv.innerHTML = `
-                        <div class="stat-item"><h3>总人数</h3><p>0</p></div>
-                        <div class="stat-item"><h3>已签到</h3><p>0</p></div>
-                        <div class="stat-item"><h3>未签到</h3><p>0</p></div>
-                        <div class="stat-item"><h3>签到率</h3><p>0%</p></div>
-                    `;
-                    return;
-                }
-
-                const checkedIn = students.filter(s => s.checked).length;
-                const percentage = total > 0 ? ((checkedIn / total) * 100).toFixed(1) : 0;
-
-                statsDiv.innerHTML = `
-                    <div class="stat-item"><h3>总人数</h3><p>${total}</p></div>
-                    <div class="stat-item"><h3>已签到</h3><p>${checkedIn}</p></div>
-                    <div class="stat-item"><h3>未签到</h3><p>${total - checkedIn}</p></div>
-                    <div class="stat-item"><h3>签到率</h3><p>${percentage}%</p></div>
-                `;
-            };
-
-            // 处理批量导入
-            const handleBulkImport = (newStudents) => {
-                if (newStudents.length === 0) {
-                    showNotification('未解析到有效数据。请检查文件或文本格式。', true);
-                    return;
-                }
-
-                // 统计重复和新增
-                let existingCount = 0;
-                let newCount = 0;
-
-                newStudents.forEach(newStudent => {
-                    const existingIndex = students.findIndex(
-                        s => s.class === newStudent.class && s.name === newStudent.name
-                    );
-
-                    if (existingIndex !== -1) {
-                        // 更新现有学生信息（保留签到状态）
-                        const existingStudent = students[existingIndex];
-                        students[existingIndex] = {
-                            ...newStudent,
-                            checked: existingStudent.checked,
-                            checkinTime: existingStudent.checkinTime
-                        };
-                        existingCount++;
-                    } else {
-                        // 添加新学生
-                        students.push({ ...newStudent, checked: false, checkinTime: null });
-                        newCount++;
-                    }
-                });
-
-                saveStudents();
-
-                if (existingCount > 0 && newCount > 0) {
-                    showNotification(`导入完成：新增${newCount}人，更新${existingCount}人`);
-                } else if (existingCount > 0) {
-                    showNotification(`导入完成：更新${existingCount}人`);
-                } else if (newCount > 0) {
-                    showNotification(`导入完成：新增${newCount}人`);
-                } else {
-                    showNotification('没有数据需要导入');
-                }
-            };
-
-            // 解析文件内容
-            const parseFileContent = (content, fileName) => {
-                try {
-                    let studentData = [];
-
-                    if (fileName.endsWith('.csv')) {
-                        const parsed = Papa.parse(content, {
-                            header: false,
-                            skipEmptyLines: true
-                        });
-                        studentData = parsed.data;
-                    } else {
-                        const wb = XLSX.read(content, { type: 'binary' });
-                        const ws = wb.Sheets[wb.SheetNames[0]];
-                        studentData = XLSX.utils.sheet_to_json(ws, { header: 1 });
-                    }
-
-                    // 过滤并转换数据
-                    const validStudents = studentData
-                        .filter(row => Array.isArray(row) && row.length >= 2)
-                        .map(row => {
-                            const className = String(row[0]).trim();
-                            const name = String(row[1]).trim();
-                            return className && name ? { class: className, name: name } : null;
-                        })
-                        .filter(Boolean);
-
-                    return validStudents;
-                } catch (error) {
-                    console.error('文件解析失败:', error);
-                    showNotification('文件解析失败，请检查文件格式', true);
-                    return [];
-                }
-            };
-
-            // 显示每日详情
-            const showDailyDetail = (date) => {
-                const record = history[date];
-                const container = document.getElementById('dailyRecordContainer');
-
-                if (!record || record.length === 0) {
-                    container.innerHTML = '<div class="empty-state">暂无此日期的签到记录</div>';
-                    return;
-                }
-
-                let tableHTML = `<h3>${date} 签到详情</h3><table><tr><th>班级</th><th>姓名</th><th>状态</th><th>签到时间</th></tr>`;
-
-                record.forEach(student => {
-                    const status = student.checked ? '✔️ 已签到' : '❌ 未签到';
-                    const time = student.checked && student.checkinTime ? student.checkinTime : 'N/A';
-                    tableHTML += `<tr><td>${student.class}</td><td>${student.name}</td><td>${status}</td><td>${time}</td></tr>`;
-                });
-
-                container.innerHTML = tableHTML + '</table>';
-            };
-
-            // 填充日期列表
-            const populateDateList = () => {
-                const container = document.getElementById('dateListContainer');
-                container.innerHTML = '';
-                document.getElementById('dailyRecordContainer').innerHTML = '';
-
-                const dates = Object.keys(history).sort().reverse();
-
-                if (dates.length === 0) {
-                    container.innerHTML = '<div class="empty-state">暂无历史记录</div>';
-                    return;
-                }
-
-                dates.forEach(date => {
-                    const dateBtn = document.createElement('button');
-                    dateBtn.textContent = date;
-                    dateBtn.addEventListener('click', () => showDailyDetail(date));
-                    container.appendChild(dateBtn);
-                });
-            };
-
-            // 生成月度汇总
-            const generateMonthlySummary = (selectedMonth) => {
-                const container = document.getElementById('monthlySummaryContainer');
-                const monthlyData = {};
-                const recordsInMonth = Object.keys(history).filter(date => date.startsWith(selectedMonth));
-
-                if (recordsInMonth.length === 0) {
-                    container.innerHTML = `<div class="empty-state">该月份 (${selectedMonth}) 没有签到记录</div>`;
-                    return;
-                }
-
-                recordsInMonth.forEach(date => {
-                    history[date].forEach(student => {
-                        const studentId = `${student.class}-${student.name}`;
-                        if (!monthlyData[studentId]) {
-                            monthlyData[studentId] = {
-                                class: student.class,
-                                name: student.name,
-                                attended: 0
-                            };
-                        }
-                        if (student.checked) monthlyData[studentId].attended++;
-                    });
-                });
-
-                let tableHTML = `<h3>${selectedMonth} 月度汇总 (共 ${recordsInMonth.length} 天记录)</h3><table><tr><th>班级</th><th>姓名</th><th>出勤天数</th><th>出勤率</th></tr>`;
-
-                Object.values(monthlyData)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .forEach(data => {
-                        const rate = ((data.attended / recordsInMonth.length) * 100).toFixed(0) + '%';
-                        tableHTML += `<tr><td>${data.class}</td><td>${data.name}</td><td>${data.attended}</td><td>${rate}</td></tr>`;
-                    });
-
-                container.innerHTML = tableHTML + '</table>';
-            };
-
-            // 填充月份选择器
-            const populateMonthSelector = () => {
-                const selector = document.getElementById('monthSelector');
-                selector.innerHTML = '';
-
-                const months = [...new Set(Object.keys(history).map(date => date.substring(0, 7)))].sort().reverse();
-
-                if (months.length === 0) {
-                    selector.style.display = 'none';
-                    document.getElementById('monthlySummaryContainer').innerHTML = '<div class="empty-state">暂无历史记录可供汇总</div>';
-                    return;
-                }
-
-                selector.style.display = 'block';
-                months.forEach(month => {
-                    const option = document.createElement('option');
-                    option.value = month;
-                    option.textContent = month;
-                    selector.appendChild(option);
-                });
-
-                generateMonthlySummary(months[0]);
-
-                selector.addEventListener('change', () => {
-                    generateMonthlySummary(selector.value);
-                });
-            };
-
-            // 事件监听器
             searchInput.addEventListener('input', renderStudentList);
-
-            manageModeToggle.addEventListener('change', e => {
-                appContainer.classList.toggle('management-mode', e.target.checked);
-            });
-
+            manageModeToggle.addEventListener('change', e => appContainer.classList.toggle('management-mode', e.target.checked));
             addStudentBtn.addEventListener('click', () => {
-                const className = newClassInput.value.trim();
-                const name = newNameInput.value.trim();
-
-                if (!className || !name) {
-                    showNotification('班级和姓名不能为空！', true);
-                    return;
-                }
-
-                if (students.some(s => s.class === className && s.name === name)) {
-                    showNotification('该学生已存在！', true);
-                    return;
-                }
-
+                const className = newClassInput.value.trim(); const name = newNameInput.value.trim();
+                if (!className || !name) { alert('班级和姓名不能为空！'); return; }
+                if (students.some(s => s.class === className && s.name === name)) { alert('该学生已存在！'); return; }
                 students.push({ class: className, name: name, checked: false, checkinTime: null });
-                newClassInput.value = '';
-                newNameInput.value = '';
-                saveStudents();
-                showNotification('学生已添加');
+                newClassInput.value = ''; newNameInput.value = ''; saveStudents();
             });
 
+            // **修正：恢复 manualAddBtn 的事件监听器**
             manualAddBtn.addEventListener('click', () => {
                 if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    const reader = new FileReader();
-
+                    const file = fileInput.files[0]; const reader = new FileReader();
                     reader.onload = e => {
-                        const studentData = parseFileContent(e.target.result, file.name);
-                        handleBulkImport(studentData);
+                        let studentData = [];
+                        try {
+                            if (file.name.endsWith('.csv')) studentData = Papa.parse(e.target.result, { header: false }).data;
+                            else { const wb = XLSX.read(e.target.result, { type: 'binary' }); studentData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }); }
+                            const newStudents = studentData.map(row => ({ class: `${row[0] || ''}`.trim(), name: `${row[1] || ''}`.trim() })).filter(s => s.class && s.name);
+                            handleBulkImport(newStudents);
+                        } catch (error) { alert('文件解析失败！'); }
                     };
-
-                    reader.onerror = () => {
-                        showNotification('文件读取失败', true);
-                    };
-
-                    if (file.name.endsWith('.csv')) {
-                        reader.readAsText(file, 'UTF-8');
-                    } else {
-                        reader.readAsBinaryString(file);
-                    }
+                    if (file.name.endsWith('.csv')) reader.readAsText(file, 'UTF-8'); else reader.readAsBinaryString(file);
                 } else {
                     const text = manualInput.value.trim();
-                    if (!text) {
-                        showNotification('请选择文件或在文本框中输入名单！', true);
-                        return;
-                    }
-
-                    // 解析文本内容
-                    const newStudents = text
-                        .split('\n')
-                        .map(line => {
-                            const trimmedLine = line.trim();
-                            if (!trimmedLine) return null;
-
-                            // 尝试多种分隔符：空格、逗号、制表符
-                            const parts = trimmedLine.split(/[\s,，\t]+/).filter(Boolean);
-                            if (parts.length >= 2) {
-                                return { class: parts[0], name: parts.slice(1).join(' ') };
-                            }
-                            return null;
-                        })
-                        .filter(Boolean);
-
+                    if (!text) { alert('请选择文件或在文本框中输入名单！'); return; }
+                    const newStudents = text.split('\n').map(line => {
+                        const parts = line.trim().split(/[\s,，\t]/).filter(Boolean);
+                        if (parts.length >= 2) return { class: parts[0], name: parts.slice(1).join(' ') };
+                        return null;
+                    }).filter(Boolean);
                     handleBulkImport(newStudents);
                 }
             });
 
             resetBtn.addEventListener('click', () => resetCheckinStatus(false));
-
             exportBtn.addEventListener('click', () => {
-                if (students.length === 0) {
-                    showNotification('没有数据可导出！', true);
-                    return;
-                }
-
-                try {
-                    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-                    csvContent += "班级,姓名,当前签到状态,签到时间\n";
-
-                    students.forEach(s => {
-                        const time = s.checkinTime || '';
-                        csvContent += `"${s.class}","${s.name}","${s.checked ? '已签到' : '未签到'}","${time}"\n`;
-                    });
-
-                    const encodedUri = encodeURI(csvContent);
-                    const link = document.createElement("a");
-                    link.setAttribute("href", encodedUri);
-                    link.setAttribute("download", `学生名单及签到状态-${getToday()}.csv`);
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-
-                    showNotification('数据已导出');
-                } catch (error) {
-                    console.error('导出失败:', error);
-                    showNotification('导出失败', true);
-                }
+                if (students.length === 0) { alert('没有数据可导出！'); return; }
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                csvContent += "班级,姓名,当前签到状态,签到时间\r\n";
+                students.forEach(s => {
+                    const time = s.checkinTime || '';
+                    csvContent += `"${s.class}","${s.name}","${s.checked ? '已签到' : '未签到'}","${time}"\r\n`;
+                });
+                const link = document.createElement("a");
+                link.href = encodeURI(csvContent);
+                link.download = `学生名单及签到状态-${getToday()}.csv`;
+                link.click();
             });
-
             statsBtn.addEventListener('click', () => {
-                if (students.length === 0) {
-                    showNotification('暂无数据，无法统计。', true);
-                    return;
-                }
-
-                const statsByClass = students.reduce((acc, s) => {
-                    if (!acc[s.class]) {
-                        acc[s.class] = { total: 0, checkedIn: 0 };
-                    }
-                    acc[s.class].total++;
-                    if (s.checked) acc[s.class].checkedIn++;
-                    return acc;
-                }, {});
-
+                if (students.length === 0) { alert('暂无数据，无法统计。'); return; }
+                const statsByClass = students.reduce((acc, s) => { (acc[s.class] = acc[s.class] || { total: 0, checkedIn: 0 }); acc[s.class].total++; if (s.checked) acc[s.class].checkedIn++; return acc; }, {});
                 let tableHTML = '<table><tr><th>班级</th><th>应到</th><th>实到</th><th>未到</th><th>签到率</th></tr>';
-
-                Object.keys(statsByClass)
-                    .sort()
-                    .forEach(className => {
-                        const data = statsByClass[className];
-                        const notCheckedIn = data.total - data.checkedIn;
-                        const rate = data.total > 0
-                            ? ((data.checkedIn / data.total) * 100).toFixed(1) + '%'
-                            : 'N/A';
-
-                        tableHTML += `<tr><td>${className}</td><td>${data.total}</td><td>${data.checkedIn}</td><td>${notCheckedIn}</td><td>${rate}</td></tr>`;
-                    });
-
+                Object.keys(statsByClass).sort().forEach(className => {
+                    const data = statsByClass[className]; const notCheckedIn = data.total - data.checkedIn;
+                    const rate = data.total > 0 ? ((data.checkedIn / data.total) * 100).toFixed(1) + '%' : 'N/A';
+                    tableHTML += `<tr><td>${className}</td><td>${data.total}</td><td>${data.checkedIn}</td><td>${notCheckedIn}</td><td>${rate}</td></tr>`;
+                });
                 document.getElementById('statsTableContainer').innerHTML = tableHTML + '</table>';
                 statsModal.style.display = 'block';
             });
-
             saveHistoryBtn.addEventListener('click', () => {
-                if (students.length === 0) {
-                    showNotification('名单为空，无法保存记录。', true);
-                    return;
-                }
-
+                if (students.length === 0) { alert('名单为空，无法保存记录。'); return; }
                 const today = getToday();
-                if (history[today] && !confirm(`今天 (${today}) 已有保存记录，是否要覆盖？`)) {
-                    return;
-                }
-
+                if (history[today] && !confirm(`今天 (${today}) 已有保存记录，是否要覆盖？`)) return;
                 history[today] = JSON.parse(JSON.stringify(students));
                 saveHistory();
-                showNotification(`${today} 的签到记录已保存`);
+                alert(`已成功保存 ${today} 的签到记录！`);
             });
-
             viewHistoryBtn.addEventListener('click', () => {
                 historyModal.style.display = 'block';
-                populateDateList();
-                populateMonthSelector();
+                populateDateList(); populateMonthSelector();
                 document.querySelector('#historyTabs button[data-tab="daily"]').click();
             });
-
             historyTabs.addEventListener('click', e => {
                 if (e.target.tagName === 'BUTTON') {
-                    document.querySelectorAll('#historyTabs button').forEach(btn =>
-                        btn.classList.remove('active')
-                    );
-                    e.target.classList.add('active');
-                    const tab = e.target.dataset.tab;
-
+                    document.querySelectorAll('#historyTabs button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active'); const tab = e.target.dataset.tab;
                     document.getElementById('dailyView').style.display = tab === 'daily' ? 'block' : 'none';
                     document.getElementById('monthlyView').style.display = tab === 'monthly' ? 'block' : 'none';
                 }
             });
+            document.querySelectorAll('.modal .close-btn').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal').style.display = 'none'));
+            window.addEventListener('click', event => { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; });
 
-            // 关闭模态框
-            document.querySelectorAll('.modal .close-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    btn.closest('.modal').style.display = 'none';
-                });
-            });
-
-            window.addEventListener('click', event => {
-                if (event.target.classList.contains('modal')) {
-                    event.target.style.display = 'none';
-                }
-            });
-
-            // 初始化
             loadData();
         });
     </script>
